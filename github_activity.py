@@ -7,6 +7,9 @@ def main():
     args = parser.parse_args()
     url =f"https://api.github.com/users/{args.username}/events"
     response = requests.get(url)
+    if response.status_code !=200:
+        print(f"User not found : {response.status_code}")
+        return
     events = response.json()
     # if no events found
     if not events:
