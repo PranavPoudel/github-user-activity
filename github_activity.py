@@ -1,7 +1,11 @@
 import requests
 import argparse
+import os 
+from dotenv import load_dotenv
 
 def main():
+    load_dotenv()
+    key = os.getenv("Bearer_Key")
     #taking an argument from the command line
 
     parser = argparse.ArgumentParser(description="fetch github activity")
@@ -10,12 +14,19 @@ def main():
     args = parser.parse_args()
     # url for the user's api from github
     url =f"https://api.github.com/users/{args.username}/events"
+    
+    headers = {
+        "Authorization": key,
+    }
+   
     #making a get request
-    response = requests.get(url)
+    response = requests.get(url, headers= headers)
     # checking if the response is ok or not
     if response.status_code !=200:
         print(f"User not found : {response.status_code}")
         return
+   
+    print(response.headers.get("x-ratelimit-remaining"))
     #parsing the response to json and assigning to events
     events = response.json()
     # if no events found
