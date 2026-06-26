@@ -2,6 +2,7 @@ import requests
 import argparse
 import os 
 from dotenv import load_dotenv
+from datetime import datetime
 
 def main():
     load_dotenv()
@@ -14,13 +15,13 @@ def main():
     args = parser.parse_args()
     # url for the user's api from github
     url =f"https://api.github.com/users/{args.username}/events"
-    
+
     headers = {
         "Authorization": key,
     }
    
     #making a get request
-    response = requests.get(url, headers= headers)
+    response = requests.get(url, headers= headers, params={"page":2})
     # checking if the response is ok or not
     if response.status_code !=200:
         print(f"User not found : {response.status_code}")
@@ -39,11 +40,16 @@ def main():
         repo = event ["repo"]
         repo_name = repo["name"]
         payload = event.get("payload",{})
+        time = event["created_at"]
+        time =time.replace('Z','+00:00')
+        time = datetime.fromisoformat(time)
+        
+        formated_time = time.strftime("%Y-%m-%d")
 
 # displaying the type of interation 
         if event_type == "PushEvent":
             commit_count = len(payload.get("commits",[]))
-            print(f"-Pushed {commit_count} commits to {repo_name}")
+            print(f"-Pushed {commit_count} commits to {repo_name} {formated_time}")
         elif event_type == "IssuesEvent":
             action = payload.get("action")
             print(f" - {action.capitalize()} an issue in {repo_name}")
